@@ -10,24 +10,28 @@
 #include "lexer.h"
 #include "parser.h"
 
-VEC_DECLARE(token_t, token);
-
-rdp_t* rdp_init(vec_token_t *tokens)
+rdp_t* rdp_init(token_t **tokens, size_t length)
 {
     rdp_t *r = xmalloc(sizeof(rdp_t));
     r->position = 0;
     r->tokens = tokens;
+    r->length = length;
     return r;
+}
+
+void rdp_free(rdp_t *ctx)
+{
+    free(ctx);
 }
 
 token_t* rdp_pop(rdp_t *ctx)
 {
-    return ctx->tokens->data[ctx->position++];
+    return ctx->tokens[ctx->position++];
 }
 
 token_t* rdp_peek(rdp_t *ctx)
 {
-    return ctx->tokens->data[ctx->position];
+    return ctx->tokens[ctx->position];
 }
 
 void rdp_consume(rdp_t *ctx)
@@ -37,7 +41,7 @@ void rdp_consume(rdp_t *ctx)
 
 void rdp_consume_blanks(rdp_t *ctx)
 {
-    while (ctx->tokens->data[ctx->position]->type == TOK_SPACE)
+    while (ctx->tokens[ctx->position]->type == TOK_SPACE)
         ctx->position++;
 }
 

@@ -29,13 +29,16 @@ typedef struct node_s {
     };
 } node_t;
 
-VEC_DECLARE(node_t, node);
-
 /* Stores the context of this recursive descent parser, in this case a stream
  * of tokens. */
 typedef struct {
-    vec_token_t *tokens;
+    token_t **tokens;
     size_t position;
+    size_t length;
 } rdp_t;
+
+rdp_t* rdp_init(token_t **tokens, size_t length);
+
+void rdp_free(rdp_t *ctx);
 
 #endif

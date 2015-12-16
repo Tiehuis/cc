@@ -4,6 +4,21 @@
 #include <stdlib.h>
 #include "compiler.h"
 
+/**
+ * The following macro generates a vector implementation for a given type.
+ * Due to the way this needs to be declared and possible redefinition problems
+ * across seperate compilation units, this is only defined file-by-file in
+ * each c file it is required.
+ *
+ * As a result, no public interface can utilize this. This isn't too much of a
+ * problem, and only requires that if returning data from a vector, we instead
+ * return the data contents and the length manually.
+ *
+ * These limitations make this method less prone to errors, and also means the
+ * interface is more standard, so plugging in seperate lexers and parsers may
+ * be a little more straight-forward.
+ */
+
 #define VEC_DECLARE(type, typename)                                          \
                                                                              \
 typedef struct {                                                             \
