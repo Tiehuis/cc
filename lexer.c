@@ -20,6 +20,7 @@ X(TOK_NUMBER);
 typedef struct {
     int type;
     char *name;
+    int is_literal;
     union {
         int id;
         char *literal;
@@ -70,6 +71,7 @@ token_t* lex_mkkw(char *type)
     token_t *token = xmalloc(sizeof(token_t));
     token->type = 0;    // This isn't set yet, but the arg will soon be type
     token->name = type;
+    token->is_literal = 0;
     return token;
 }
 
@@ -78,6 +80,7 @@ token_t* lex_mknumber(char *type, char *number)
     token_t *token = xmalloc(sizeof(token_t));
     token->type = 0;
     token->name = type;
+    token->is_literal = 1;
     token->literal = number;
     return token;
 }
@@ -87,6 +90,7 @@ token_t* lex_mkident(char *type, char *identifier)
     token_t *token = xmalloc(sizeof(token_t));
     token->type = 0;
     token->name = type;
+    token->is_literal = 1;
     token->literal = identifier;
     return token;
 }
@@ -102,6 +106,7 @@ token_t* lex_chnumber(lex_t *ctx, char value)
             lex_ungetc(ctx, c);
             break;
         }
+        vec_char_push(number, c);
     }
 
     /* This will leak memory for the moment, not important just yet but beware */
@@ -120,6 +125,7 @@ token_t* lex_chident(lex_t *ctx, char value)
             lex_ungetc(ctx, c);
             break;
         }
+        vec_char_push(identifier, c);
     }
 
     /* This will leak memory for the moment, not important just yet but beware */
@@ -175,10 +181,17 @@ token_t* lex_token(lex_t *ctx)
 int main(void)
 {
     lex_t *ctx = lex_init("test.c");
+    vec_token_t *tokens = vec_token_init();
 
     token_t *tok;
     while ((tok = lex_token(ctx)) != NULL) {
-        printf("%s, ", tok->name);
+        vec_token_push(tokens, tok);
+    }
+
+    for (int i = 0; i < tokens->len; ++i) {
+        token_t *t = tokens->data[i];
+        printf("%s: ", t->name);
+        printf("%s\n", t->is_literal ? t->literal : "");
     }
 
     lex_free(ctx);
