@@ -7,47 +7,13 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "compiler.h"
-#include "vec.h"
-
-
-enum {
-#define X(x) x,
-#include "tokens.include"
-#undef X
-__lex_dummy__  /* Dummy element for trailing comma */
-};
-
-char *token_names[] = {
-#define X(x) #x,
-#include "tokens.include"
-#undef X
-"__lex_dummy__"
-};
-
-typedef struct {
-    int type;
-    int is_literal;
-    union {
-        int id;
-        char *literal;
-    };
-} token_t;
-
-/* Initialize vec_token_t */
-VEC_DECLARE(token_t*, token);
-
-/* Initialize vec_char_t/string */
-VEC_DECLARE(char, char);
+#include "lexer.h"
 
 token_t __lex_eof_token_store = { TOK_EOF , 0};
 token_t *lex_eof_token = &__lex_eof_token_store;
 
 token_t __lex_space_token_store = { TOK_SPACE, 0 };
 token_t *lex_space_token = &__lex_space_token_store;
-
-typedef struct {
-    FILE *fd;
-} lex_t;
 
 lex_t* lex_init(char *filename)
 {
