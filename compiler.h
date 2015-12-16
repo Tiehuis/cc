@@ -24,4 +24,10 @@
     __mem;                      \
 })
 
+#define xerror(msg)             \
+({                              \
+    fprintf(stderr, "%s\n", msg);\
+    abort();                    \
+})
+
 #endif

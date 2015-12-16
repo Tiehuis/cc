@@ -9,17 +9,23 @@
 #include "compiler.h"
 #include "vec.h"
 
-#define X(x) char *x = #x
-X(TOK_IDENT);
-X(TOK_PLUS);
-X(TOK_SEMICOLON);
-X(TOK_EQUALS);
-X(TOK_NUMBER);
+
+enum {
+#define X(x) x,
+#include "tokens.include"
 #undef X
+__lex_dummy__  /* Dummy element for trailing comma */
+};
+
+char *token_names[] = {
+#define X(x) #x,
+#include "tokens.include"
+#undef X
+"__lex_dummy__"
+};
 
 typedef struct {
     int type;
-    char *name;
     int is_literal;
     union {
         int id;
@@ -33,10 +39,10 @@ VEC_DECLARE(token_t*, token);
 /* Initialize vec_char_t/string */
 VEC_DECLARE(char, char);
 
-token_t __lex_eof_token_store = { 0, "TOK_EOF" };
+token_t __lex_eof_token_store = { TOK_EOF , 0};
 token_t *lex_eof_token = &__lex_eof_token_store;
 
-token_t __lex_space_token_store = { 0, "TOK_SPACE" };
+token_t __lex_space_token_store = { TOK_SPACE, 0 };
 token_t *lex_space_token = &__lex_space_token_store;
 
 typedef struct {
@@ -66,30 +72,27 @@ void lex_ungetc(lex_t *ctx, char c)
     ungetc(c, ctx->fd);
 }
 
-token_t* lex_mkkw(char *type)
+token_t* lex_mkkw(int type)
 {
     token_t *token = xmalloc(sizeof(token_t));
-    token->type = 0;    // This isn't set yet, but the arg will soon be type
-    token->name = type;
+    token->type = type;
     token->is_literal = 0;
     return token;
 }
 
-token_t* lex_mknumber(char *type, char *number)
+token_t* lex_mknumber(int type, char *number)
 {
     token_t *token = xmalloc(sizeof(token_t));
-    token->type = 0;
-    token->name = type;
+    token->type = type;
     token->is_literal = 1;
     token->literal = number;
     return token;
 }
 
-token_t* lex_mkident(char *type, char *identifier)
+token_t* lex_mkident(int type, char *identifier)
 {
     token_t *token = xmalloc(sizeof(token_t));
-    token->type = 0;
-    token->name = type;
+    token->type = type;
     token->is_literal = 1;
     token->literal = identifier;
     return token;
@@ -190,7 +193,7 @@ int main(void)
 
     for (int i = 0; i < tokens->len; ++i) {
         token_t *t = tokens->data[i];
-        printf("%s: ", t->name);
+        printf("%s: ", token_names[t->type]);
         printf("%s\n", t->is_literal ? t->literal : "");
     }
 
