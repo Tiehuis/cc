@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "compiler.h"
 
-#define vec_declare(type, typename)                                          \
+#define VEC_DECLARE(type, typename)                                          \
                                                                              \
 typedef struct {                                                             \
     type *data;                                                              \
@@ -38,15 +38,17 @@ static void __vec_##typename##_try_resize(vec_##typename##_t *v)             \
     v->data  = xrealloc(v->data, v->alloc * sizeof(type));                   \
 }                                                                            \
                                                                              \
-void vec_##typename##_push(vec_##typename##_t *v, const type elem)           \
+void vec_##typename##_push(vec_##typename##_t *v, type elem)                 \
 {                                                                            \
     __vec_##typename##_try_resize;                                           \
     v->data[v->len++] = elem;                                                \
 }                                                                            \
                                                                              \
-int vec_##typename##_pop(vec_##typename##_t *v)                              \
+type vec_##typename##_pop(vec_##typename##_t *v)                             \
 {                                                                            \
     return v->data[--v->len];                                                \
-}
+}                                                                            \
+                                                                             \
+static char __allow_trailing_comma_##typename
 
 #endif
