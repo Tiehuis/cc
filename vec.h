@@ -12,9 +12,9 @@ typedef struct {                                                             \
     size_t len;                                                              \
 } vec_##typename##_t;                                                        \
                                                                              \
-const size_t vec_##typename##_initial_alloc = 128;                           \
+static const size_t vec_##typename##_initial_alloc = 128;                    \
                                                                              \
-vec_##typename##_t* vec_##typename##_init(void)                              \
+static vec_##typename##_t* vec_##typename##_init(void)                       \
 {                                                                            \
     vec_##typename##_t *v = xmalloc(sizeof(vec_##typename##_t));             \
     v->alloc = vec_##typename##_initial_alloc;                               \
@@ -23,7 +23,7 @@ vec_##typename##_t* vec_##typename##_init(void)                              \
     return v;                                                                \
 }                                                                            \
                                                                              \
-void vec_##typename##_free(vec_##typename##_t *v)                            \
+static void vec_##typename##_free(vec_##typename##_t *v)                     \
 {                                                                            \
     free(v->data);                                                           \
     free(v);                                                                 \
@@ -38,13 +38,13 @@ static void __vec_##typename##_try_resize(vec_##typename##_t *v)             \
     v->data  = xrealloc(v->data, v->alloc * sizeof(type));                   \
 }                                                                            \
                                                                              \
-void vec_##typename##_push(vec_##typename##_t *v, type elem)                 \
+static void vec_##typename##_push(vec_##typename##_t *v, type elem)          \
 {                                                                            \
     __vec_##typename##_try_resize;                                           \
     v->data[v->len++] = elem;                                                \
 }                                                                            \
                                                                              \
-type vec_##typename##_pop(vec_##typename##_t *v)                             \
+static type vec_##typename##_pop(vec_##typename##_t *v)                      \
 {                                                                            \
     return v->data[--v->len];                                                \
 }                                                                            \

@@ -10,6 +10,8 @@
 #include "lexer.h"
 #include "parser.h"
 
+VEC_DECLARE(token_t, token);
+
 rdp_t* rdp_init(vec_token_t *tokens)
 {
     rdp_t *r = xmalloc(sizeof(rdp_t));

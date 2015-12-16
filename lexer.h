@@ -11,7 +11,7 @@ enum {
 __lex_dummy__  /* Dummy element for trailing comma */
 };
 
-char *token_names[] = {
+static const char *__token_names[] = {
 #define X(x) #x,
 #include "tokens.include"
 #undef X
@@ -27,14 +27,14 @@ typedef struct {
     };
 } token_t;
 
-/* Initialize vec_token_t */
-VEC_DECLARE(token_t*, token);
-
-/* Initialize vec_char_t/string */
-VEC_DECLARE(char, char);
-
 typedef struct {
     FILE *fd;
 } lex_t;
+
+lex_t* lex_init(char *filename);
+
+void lex_free(lex_t *ctx);
+
+token_t* lex_token(lex_t *ctx);
 
 #endif

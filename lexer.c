@@ -9,6 +9,10 @@
 #include "compiler.h"
 #include "lexer.h"
 
+/* Initialize vec_token_t */
+VEC_DECLARE(token_t*, token);
+VEC_DECLARE(char, char);
+
 token_t __lex_eof_token_store = { TOK_EOF , 0};
 token_t *lex_eof_token = &__lex_eof_token_store;
 
@@ -28,17 +32,17 @@ void lex_free(lex_t *ctx)
     free(ctx);
 }
 
-int lex_getc(lex_t *ctx)
+static int lex_getc(lex_t *ctx)
 {
     return fgetc(ctx->fd);
 }
 
-void lex_ungetc(lex_t *ctx, char c)
+static void lex_ungetc(lex_t *ctx, char c)
 {
     ungetc(c, ctx->fd);
 }
 
-token_t* lex_mkkw(int type)
+static token_t* lex_mkkw(int type)
 {
     token_t *token = xmalloc(sizeof(token_t));
     token->type = type;
@@ -46,7 +50,7 @@ token_t* lex_mkkw(int type)
     return token;
 }
 
-token_t* lex_mknumber(int type, char *number)
+static token_t* lex_mknumber(int type, char *number)
 {
     token_t *token = xmalloc(sizeof(token_t));
     token->type = type;
@@ -55,7 +59,7 @@ token_t* lex_mknumber(int type, char *number)
     return token;
 }
 
-token_t* lex_mkident(int type, char *identifier)
+static token_t* lex_mkident(int type, char *identifier)
 {
     token_t *token = xmalloc(sizeof(token_t));
     token->type = type;
@@ -64,7 +68,7 @@ token_t* lex_mkident(int type, char *identifier)
     return token;
 }
 
-token_t* lex_chnumber(lex_t *ctx, char value)
+static token_t* lex_chnumber(lex_t *ctx, char value)
 {
     vec_char_t *number = vec_char_init();
     vec_char_push(number, value);
@@ -83,7 +87,7 @@ token_t* lex_chnumber(lex_t *ctx, char value)
     return lex_mknumber(TOK_NUMBER, number->data);
 }
 
-token_t* lex_chident(lex_t *ctx, char value)
+static token_t* lex_chident(lex_t *ctx, char value)
 {
     vec_char_t *identifier = vec_char_init();
     vec_char_push(identifier, value);
@@ -102,7 +106,7 @@ token_t* lex_chident(lex_t *ctx, char value)
     return lex_mkident(TOK_IDENT, identifier->data);
 }
 
-int lex_skip_space(lex_t *ctx)
+static int lex_skip_space(lex_t *ctx)
 {
     int c = lex_getc(ctx);
 
@@ -145,23 +149,4 @@ token_t* lex_token(lex_t *ctx)
     }
 
     return NULL;
-}
-
-int main(void)
-{
-    lex_t *ctx = lex_init("test.c");
-    vec_token_t *tokens = vec_token_init();
-
-    token_t *tok;
-    while ((tok = lex_token(ctx)) != NULL) {
-        vec_token_push(tokens, tok);
-    }
-
-    for (int i = 0; i < tokens->len; ++i) {
-        token_t *t = tokens->data[i];
-        printf("%s: ", token_names[t->type]);
-        printf("%s\n", t->is_literal ? t->literal : "");
-    }
-
-    lex_free(ctx);
 }
