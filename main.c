@@ -67,11 +67,12 @@ int main(void)
     vec_token_t *tokens = vec_token_init();
 
     token_t *tok;
-    while ((tok = lex_token(lctx)) != NULL) {
+    do {
+        tok = lex_token(lctx);
         vec_token_push(tokens, tok);
-    }
+    } while (tok->type != TOK_EOF);
 
-    printf("\nTOKEN STREAM:\n");
+    printf("\nTOKEN STREAM:\n-----------\n");
     for (size_t i = 0; i < tokens->len; ++i) {
         token_t *t = tokens->data[i];
         printf("%s: ", __token_names[t->type]);
@@ -84,7 +85,7 @@ int main(void)
     rdp_t *rctx = rdp_init(tokens->data, tokens->len);
 
     /* Get a root node for an AST */
-    printf("\nAST:\n");
+    printf("\nAST:\n-----------\n");
     node_t *root = rdp_generate_ast(rctx);
 
     print_t(root);

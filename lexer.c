@@ -13,12 +13,6 @@
 VEC_DECLARE(token_t*, token);
 VEC_DECLARE(char, char);
 
-token_t __lex_eof_token_store = { .type = TOK_EOF, .is_literal = 0 };
-token_t *lex_eof_token = &__lex_eof_token_store;
-
-token_t __lex_space_token_store = { .type = TOK_SPACE, .is_literal = 0 };
-token_t *lex_space_token = &__lex_space_token_store;
-
 lex_t* lex_init(char *filename)
 {
     lex_t *ctx = xmalloc(sizeof(lex_t));
@@ -40,6 +34,14 @@ static int lex_getc(lex_t *ctx)
 static void lex_ungetc(lex_t *ctx, char c)
 {
     ungetc(c, ctx->fd);
+}
+
+static token_t* lex_mkspecial(int type)
+{
+    token_t *token = xmalloc(sizeof(token_t));
+    token->type = type;
+    token->is_literal = 0;
+    return token;
 }
 
 static token_t* lex_mkkw(int type)
@@ -126,7 +128,7 @@ token_t* lex_token(lex_t *ctx)
 {
     // Skip all spaces and comments and return space token if successful
     if (lex_skip_space(ctx))
-        return lex_space_token;
+        return lex_mkspecial(TOK_SPACE);
 
     // Read a character and proceed case by case
     int c = lex_getc(ctx);
@@ -145,8 +147,8 @@ token_t* lex_token(lex_t *ctx)
     case '_':
         return lex_chident(ctx, c);
     case EOF:
-        return NULL;
+        return lex_mkspecial(TOK_EOF);
     }
 
-    return NULL;
+    return lex_mkspecial(TOK_EOF);
 }

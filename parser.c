@@ -102,22 +102,24 @@ node_t* rdp_number(rdp_t *ctx)
 }
 
 /**
- * <expression> ::= <number> [ <operator> <number> ]
- * <
+ * <expression> ::= <number> [ <operator> <expression> ]
  */
 node_t* rdp_expression(rdp_t *ctx)
 {
+    rdp_consume_blanks(ctx);
+
     /* Expect number */
     node_t *left = rdp_number(ctx);
     rdp_consume_blanks(ctx);
 
     if (rdp_pop(ctx)->type == TOK_PLUS) {
         rdp_consume_blanks(ctx);
-        node_t *right = rdp_number(ctx);
+        node_t *right = rdp_expression(ctx);
         return ast_binary_operator(TOK_PLUS, left, right);
     }
-
-    return left;
+    else {
+        return left;
+    }
 }
 
 node_t* rdp_generate_ast(rdp_t *ctx)
