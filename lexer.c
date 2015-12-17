@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "compiler.h"
+#include "token.h"
 #include "lexer.h"
 
 /* Initialize vec_token_t */

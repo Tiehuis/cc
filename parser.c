@@ -2,10 +2,15 @@
  * parser.c
  *
  * Parse things.
+ *
+ * This is a simple recursive descent parser. We keep a context 'ctx' which
+ * keeps the current state of the lexeme stream that we are reading from.
+ * All lexemes are non-null, with the final lexeme having a type of 'TOK_EOF'.
  */
 
 #include <string.h>
 #include <stdlib.h>
+#include "token.h"
 #include "compiler.h"
 #include "lexer.h"
 #include "parser.h"
@@ -112,21 +117,16 @@ node_t* rdp_expression(rdp_t *ctx)
     node_t *left = rdp_number(ctx);
     rdp_consume_blanks(ctx);
 
-    token_t *tok = rdp_peek(ctx);
+    token_t *op = rdp_peek(ctx);
 
-    switch (tok->type) {
-        /* If we have an operator */
-        case TOK_PLUS: case TOK_MINUS:
-        case TOK_MULTIPLY: case TOK_DIV:
-        case TOK_MOD:
-            rdp_consume(ctx);
-            rdp_consume_blanks(ctx);
-            node_t *right = rdp_expression(ctx);
-            return ast_binary_operator(tok->type, left, right);
-
-        /* Else no operator */
-        default:
-            return left;
+    if (token_is_operator(op)) {
+        rdp_consume(ctx);
+        rdp_consume_blanks(ctx);
+        node_t *right = rdp_expression(ctx);
+        return ast_binary_operator(op->type, left, right);
+    }
+    else {
+        return left;
     }
 }
 
