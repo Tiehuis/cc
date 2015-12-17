@@ -48,7 +48,7 @@ int _print_t(node_t *node, int is_left, int offset, int depth, char s[20][255])
     return left + width + right;
 }
 
-int print_t(node_t *root)
+void print_t(node_t *root)
 {
     char s[20][255];
     for (int i = 0; i < 20; i++)
@@ -71,7 +71,8 @@ int main(void)
         vec_token_push(tokens, tok);
     }
 
-    for (int i = 0; i < tokens->len; ++i) {
+    printf("\nTOKEN STREAM:\n");
+    for (size_t i = 0; i < tokens->len; ++i) {
         token_t *t = tokens->data[i];
         printf("%s: ", __token_names[t->type]);
         printf("%s\n", t->is_literal ? t->literal : "");
@@ -83,11 +84,12 @@ int main(void)
     rdp_t *rctx = rdp_init(tokens->data, tokens->len);
 
     /* Get a root node for an AST */
+    printf("\nAST:\n");
     node_t *root = rdp_generate_ast(rctx);
 
     print_t(root);
 
     rdp_free(rctx);
-
+    return 0;
 }
 

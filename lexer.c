@@ -13,10 +13,10 @@
 VEC_DECLARE(token_t*, token);
 VEC_DECLARE(char, char);
 
-token_t __lex_eof_token_store = { TOK_EOF , 0};
+token_t __lex_eof_token_store = { .type = TOK_EOF, .is_literal = 0 };
 token_t *lex_eof_token = &__lex_eof_token_store;
 
-token_t __lex_space_token_store = { TOK_SPACE, 0 };
+token_t __lex_space_token_store = { .type = TOK_SPACE, .is_literal = 0 };
 token_t *lex_space_token = &__lex_space_token_store;
 
 lex_t* lex_init(char *filename)
