@@ -3,14 +3,14 @@
 
 enum {
 #define X(x) x,
-#   include "tokens.include"
+#   include "token.include"
 #undef X
 __token_dummy__  /* Dummy element for trailing comma */
 };
 
 static const char *__token_names[] = {
 #define X(x) #x,
-#   include "tokens.include"
+#   include "token.include"
 #undef X
 "__token_dummy__"
 };
