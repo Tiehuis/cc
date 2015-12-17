@@ -112,13 +112,21 @@ node_t* rdp_expression(rdp_t *ctx)
     node_t *left = rdp_number(ctx);
     rdp_consume_blanks(ctx);
 
-    if (rdp_pop(ctx)->type == TOK_PLUS) {
-        rdp_consume_blanks(ctx);
-        node_t *right = rdp_expression(ctx);
-        return ast_binary_operator(TOK_PLUS, left, right);
-    }
-    else {
-        return left;
+    token_t *tok = rdp_peek(ctx);
+
+    switch (tok->type) {
+        /* If we have an operator */
+        case TOK_PLUS: case TOK_MINUS:
+        case TOK_MULTIPLY: case TOK_DIV:
+        case TOK_MOD:
+            rdp_consume(ctx);
+            rdp_consume_blanks(ctx);
+            node_t *right = rdp_expression(ctx);
+            return ast_binary_operator(tok->type, left, right);
+
+        /* Else no operator */
+        default:
+            return left;
     }
 }
 

@@ -10,8 +10,8 @@ int _print_t(node_t *node, int is_left, int offset, int depth, char s[20][255])
     char b[20];
     int width = 5;
 
-    if (node->id == TOK_PLUS) {
-        sprintf(b, "( + )");
+    if (node->id != LITERAL) {
+        sprintf(b, "(%s)", __token_names[node->id] + 4);
     }
     else if (node->id == LITERAL) {
         sprintf(b, "(%03ld)", node->value);
@@ -66,6 +66,7 @@ int main(void)
     lex_t *lctx = lex_init("test.c");
     vec_token_t *tokens = vec_token_init();
 
+    /* Construct lexemes from a file */
     token_t *tok;
     do {
         tok = lex_token(lctx);
@@ -81,7 +82,7 @@ int main(void)
 
     lex_free(lctx);
 
-    /* Put input into parser */
+    /* Channel lexemes through parser */
     rdp_t *rctx = rdp_init(tokens->data, tokens->len);
 
     /* Get a root node for an AST */

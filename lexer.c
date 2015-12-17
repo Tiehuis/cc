@@ -11,6 +11,8 @@
 
 /* Initialize vec_token_t */
 VEC_DECLARE(token_t*, token);
+
+/* Initialize vec_char_t */
 VEC_DECLARE(char, char);
 
 lex_t* lex_init(char *filename)
@@ -136,6 +138,14 @@ token_t* lex_token(lex_t *ctx)
     switch (c) {
     case '+':
         return lex_mkkw(TOK_PLUS);
+    case '-':
+        return lex_mkkw(TOK_MINUS);
+    case '/':
+        return lex_mkkw(TOK_DIV);
+    case '*':
+        return lex_mkkw(TOK_MULTIPLY);
+    case '%':
+        return lex_mkkw(TOK_MOD);
     case '=':
         return lex_mkkw(TOK_EQUALS);
     case ';':
