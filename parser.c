@@ -6,6 +6,9 @@
  * This is a simple recursive descent parser. We keep a context 'ctx' which
  * keeps the current state of the lexeme stream that we are reading from.
  * All lexemes are non-null, with the final lexeme having a type of 'TOK_EOF'.
+ *
+ * The current grammar is a simplified version of
+ *    'www.cs.man.ac.uk/~pjj/bnf/c_syntax.bnf'
  */
 
 #include <string.h>
@@ -81,23 +84,15 @@ node_t *ast_number(long value)
 }
 
 /**
- * <operator> ::= "+"
+ * <const> : [0-9]
  */
-node_t* rdp_operator(rdp_t *ctx)
+node_t* rdp_const(rdp_t *ctx)
 {
-    return NULL;
-}
-
-/**
- * <number> ::= [0-9]
- */
-node_t* rdp_number(rdp_t *ctx)
-{
-    /* Read the current token */
+    rdp_consume_blanks(ctx);
     token_t *t = rdp_pop(ctx);
 
     if (t->type != TOK_NUMBER) {
-        return NULL;
+        xerror("Invalid symbol encountered");
     }
     else {
         /* Parse number into value */
@@ -107,29 +102,76 @@ node_t* rdp_number(rdp_t *ctx)
 }
 
 /**
- * <expression> ::= <number> [ <operator> <expression> ]
+ * <primary_exp> : <const>
  */
-node_t* rdp_expression(rdp_t *ctx)
+node_t* rdp_primary_exp(rdp_t *ctx)
 {
-    rdp_consume_blanks(ctx);
+    return rdp_const(ctx);
+}
 
-    /* Expect number */
-    node_t *left = rdp_number(ctx);
-    rdp_consume_blanks(ctx);
+/**
+ * <unary_exp> : <primary_exp>
+ */
+node_t* rdp_unary_exp(rdp_t *ctx)
+{
+    return rdp_primary_exp(ctx);
+}
 
+/**
+ * <mult_exp> : <unary_exp>
+ *            | <mult_exp> '*' <unary_exp>
+ *            | <mult_exp> '/' <unary_exp>
+ *            | <mult_exp> '%' <unary_exp>
+ */
+node_t* rdp_mult_exp(rdp_t *ctx)
+{
+    node_t *left = rdp_unary_exp(ctx);
+
+    rdp_consume_blanks(ctx);
     token_t *op = rdp_peek(ctx);
-
-    if (token_is_operator(op)) {
-        rdp_consume(ctx);
-        rdp_consume_blanks(ctx);
-        node_t *right = rdp_expression(ctx);
-        return ast_binary_operator(op->type, left, right);
-    }
-    else {
-        return left;
+    switch (op->type) {
+        case TOK_MULTIPLY:
+        case TOK_DIV:
+        case TOK_MOD:
+            rdp_consume(ctx);
+            return ast_binary_operator(op->type, left, rdp_unary_exp(ctx));
+        default:
+            return left;
     }
 }
 
+/**
+ * <additive_exp> : <mult_exp>
+ *                | <additive_exp> '+' <mult_exp>
+ *                | <additive_exp> '-' <mult_exp>
+ */
+node_t* rdp_additive_exp(rdp_t *ctx)
+{
+    node_t *left = rdp_mult_exp(ctx);
+
+    rdp_consume_blanks(ctx);
+    token_t *op = rdp_peek(ctx);
+    switch (op->type) {
+        case TOK_PLUS:
+        case TOK_MINUS:
+            rdp_consume(ctx);
+            return ast_binary_operator(op->type, left, rdp_mult_exp(ctx));
+        default:
+            return left;
+    }
+}
+
+/**
+ * <expression> : <additive_exp>
+ */
+node_t* rdp_expression(rdp_t *ctx)
+{
+    return rdp_additive_exp(ctx);
+}
+
+/**
+ * Fix the non-decension issues.
+ */
 node_t* rdp_generate_ast(rdp_t *ctx)
 {
     return rdp_expression(ctx);

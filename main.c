@@ -6,61 +6,25 @@
 
 VEC_DECLARE(token_t*, token);
 
-int _print_t(node_t *node, int is_left, int offset, int depth, char s[20][255])
+void print_tree(node_t *node, size_t depth)
 {
-    char b[20];
-    int width = 5;
-
-    if (node->id != LITERAL) {
-        sprintf(b, "(%s)", __token_names[node->id] + 4);
-    }
-    else if (node->id == LITERAL) {
-        sprintf(b, "(%03ld)", node->value);
-    }
-    else {
-        xerror("failed to print");
+    switch (node->id) {
+    case LITERAL:
+        printf("(%zd): %ld\n", depth, node->value);
+        break;
+    default:
+        printf("(%zd): %s\n", depth, __token_names[node->id] + 4);
+        break;
     }
 
-    int left = 0, right = 0;
-
+    /* Need to change when adding unary operators */
     if (!node->is_term) {
-        left  = _print_t(node->left,  1, offset,                depth + 1, s);
-        right = _print_t(node->right, 0, offset + left + width, depth + 1, s);
+        if (node->left)
+            print_tree(node->left, depth + 1);
+        if (node->right)
+            print_tree(node->right, depth + 1);
     }
-
-    for (int i = 0; i < width; i++)
-        s[depth][offset + left + i] = b[i];
-
-    if (depth && is_left) {
-
-        for (int i = 0; i < width + right; i++)
-            s[depth - 1][offset + left + width/2 + i] = '-';
-
-        s[depth - 1][offset + left + width/2] = '.';
-
-    } else if (depth && !is_left) {
-
-        for (int i = 0; i < left + width; i++)
-            s[depth - 1][offset - width/2 + i] = '-';
-
-        s[depth - 1][offset + left + width/2] = '.';
-    }
-
-    return left + width + right;
 }
-
-void print_t(node_t *root)
-{
-    char s[20][255];
-    for (int i = 0; i < 20; i++)
-        sprintf(s[i], "%80s", " ");
-
-    _print_t(root, 0, 0, 0, s);
-
-    for (int i = 0; i < 20; i++)
-        printf("%s\n", s[i]);
-}
-
 
 int main(void)
 {
@@ -90,7 +54,7 @@ int main(void)
     printf("\nAST:\n-----------\n");
     node_t *root = rdp_generate_ast(rctx);
 
-    print_t(root);
+    print_tree(root, 0);
 
     rdp_free(rctx);
     return 0;
