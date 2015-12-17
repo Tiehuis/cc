@@ -12,6 +12,7 @@ enum {
 typedef struct node_s {
     int type;
     int id;
+    int is_term;
     union {
         /* char, int, long */
         long value;
@@ -40,5 +41,7 @@ typedef struct {
 rdp_t* rdp_init(token_t **tokens, size_t length);
 
 void rdp_free(rdp_t *ctx);
+
+node_t* rdp_generate_ast(rdp_t *ctx);
 
 #endif

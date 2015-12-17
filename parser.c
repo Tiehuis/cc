@@ -24,11 +24,6 @@ void rdp_free(rdp_t *ctx)
     free(ctx);
 }
 
-token_t* rdp_pop(rdp_t *ctx)
-{
-    return ctx->tokens[ctx->position++];
-}
-
 token_t* rdp_peek(rdp_t *ctx)
 {
     return ctx->tokens[ctx->position];
@@ -37,6 +32,13 @@ token_t* rdp_peek(rdp_t *ctx)
 void rdp_consume(rdp_t *ctx)
 {
     ctx->position++;
+}
+
+token_t* rdp_pop(rdp_t *ctx)
+{
+    token_t *t = rdp_peek(ctx);
+    rdp_consume(ctx);
+    return t;
 }
 
 void rdp_consume_blanks(rdp_t *ctx)
@@ -51,6 +53,7 @@ node_t* ast_binary_operator(int id, node_t *left, node_t *right)
     n->id = id;
     n->left = left;
     n->right = right;
+    n->is_term = 0;
     return n;
 }
 
@@ -59,6 +62,7 @@ node_t* ast_unary_operator(int id, node_t *operand)
     node_t *n = xmalloc(sizeof(node_t));
     n->id = id;
     n->operand = operand;
+    n->is_term = 0;
     return n;
 }
 
@@ -67,6 +71,7 @@ node_t *ast_number(long value)
     node_t *n = xmalloc(sizeof(node_t));
     n->id = LITERAL;
     n->value = value;
+    n->is_term = 1;
     return n;
 }
 
@@ -104,11 +109,18 @@ node_t* rdp_expression(rdp_t *ctx)
 {
     /* Expect number */
     node_t *left = rdp_number(ctx);
+    rdp_consume_blanks(ctx);
 
-    if (rdp_peek(ctx)->type == TOK_PLUS) {
+    if (rdp_pop(ctx)->type == TOK_PLUS) {
+        rdp_consume_blanks(ctx);
         node_t *right = rdp_number(ctx);
         return ast_binary_operator(TOK_PLUS, left, right);
     }
 
     return left;
+}
+
+node_t* rdp_generate_ast(rdp_t *ctx)
+{
+    return rdp_expression(ctx);
 }
