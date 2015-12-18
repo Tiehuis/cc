@@ -1,3 +1,9 @@
+/**
+ * compiler.h
+ *
+ * Common core header includes and definitions are here.
+ */
+
 #ifndef COMPILER_H
 #define COMPILER_H
 

@@ -1,3 +1,7 @@
+/**
+ * parser.h
+ */
+
 #ifndef PARSER_H
 #define PARSER_H
 
@@ -5,10 +9,9 @@
 #include "lexer.h"
 #include "vec.h"
 
-enum {
-    LITERAL
-};
-
+/**
+ * Stores information about a ast node value.
+ */
 typedef struct node_s {
     int type;
     int id;

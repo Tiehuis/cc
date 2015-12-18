@@ -1,7 +1,7 @@
 /**
  * eval.c
  *
- * Evaluate an ast expression.
+ * Evaluate an ast and return the result.
  */
 
 #include "compiler.h"

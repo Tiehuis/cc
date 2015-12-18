@@ -1,3 +1,9 @@
+/**
+ * main.c
+ *
+ * The frontend for invoking the 'lexer', 'parser', and 'eval' phases.
+ */
+
 #include <stdio.h>
 #include "lexer.h"
 #include "token.h"
@@ -10,7 +16,7 @@ VEC_DECLARE(token_t*, token);
 void print_tree(node_t *node, size_t depth)
 {
     switch (node->id) {
-    case LITERAL:
+    case TOK_NUMBER:
         printf("(%zd): %ld\n", depth, node->value);
         break;
     default:

@@ -39,6 +39,10 @@ static void lex_ungetc(lex_t *ctx, char c)
     ungetc(c, ctx->fd);
 }
 
+/**
+ * The 'lex_mk*' functions allocate memory or 'make' a particular token.
+ */
+
 static token_t* lex_mkspecial(int type)
 {
     token_t *token = xmalloc(sizeof(token_t));
@@ -72,6 +76,11 @@ static token_t* lex_mkident(int type, char *identifier)
     token->literal = identifier;
     return token;
 }
+
+/**
+ * The 'lex_ch*' functions 'check' the incoming tokens for expected results
+ * and call 'lex_mk' functions from them.
+ */
 
 static token_t* lex_chnumber(lex_t *ctx, char value)
 {
@@ -126,7 +135,10 @@ static int lex_skip_space(lex_t *ctx)
     return 0;
 }
 
-/* Return the next found token */
+/* Return the next found token. This could be implemented as a FSM using switch
+ * statements and may at some point, but with a file-backed, char-by-char read
+ * approach it makes consuming string-literals and numbers a little less
+ * convenient. */
 token_t* lex_token(lex_t *ctx)
 {
     // Skip all spaces and comments and return space token if successful

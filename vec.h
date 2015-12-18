@@ -1,9 +1,3 @@
-#ifndef VECTOR_H
-#define VECTOR_H
-
-#include <stdlib.h>
-#include "compiler.h"
-
 /**
  * The following macro generates a vector implementation for a given type.
  * Due to the way this needs to be declared and possible redefinition problems
@@ -18,6 +12,12 @@
  * interface is more standard, so plugging in seperate lexers and parsers may
  * be a little more straight-forward.
  */
+
+#ifndef VECTOR_H
+#define VECTOR_H
+
+#include <stdlib.h>
+#include "compiler.h"
 
 #define VEC_DECLARE(type, typename)                                          \
                                                                              \
