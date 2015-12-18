@@ -127,16 +127,20 @@ node_t* rdp_mult_exp(rdp_t *ctx)
 {
     node_t *left = rdp_unary_exp(ctx);
 
-    rdp_consume_blanks(ctx);
-    token_t *op = rdp_peek(ctx);
-    switch (op->type) {
-        case TOK_MULTIPLY:
-        case TOK_DIV:
-        case TOK_MOD:
-            rdp_consume(ctx);
-            return ast_binary_operator(op->type, left, rdp_unary_exp(ctx));
-        default:
-            return left;
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op = rdp_peek(ctx);
+
+        switch (op->type) {
+            case TOK_MULTIPLY:
+            case TOK_DIV:
+            case TOK_MOD:
+                rdp_consume(ctx);
+                left = ast_binary_operator(op->type, left, rdp_unary_exp(ctx));
+                break;
+            default:
+                return left;
+        }
     }
 }
 
@@ -149,15 +153,19 @@ node_t* rdp_additive_exp(rdp_t *ctx)
 {
     node_t *left = rdp_mult_exp(ctx);
 
-    rdp_consume_blanks(ctx);
-    token_t *op = rdp_peek(ctx);
-    switch (op->type) {
-        case TOK_PLUS:
-        case TOK_MINUS:
-            rdp_consume(ctx);
-            return ast_binary_operator(op->type, left, rdp_mult_exp(ctx));
-        default:
-            return left;
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op = rdp_peek(ctx);
+
+        switch (op->type) {
+            case TOK_PLUS:
+            case TOK_MINUS:
+                rdp_consume(ctx);
+                left = ast_binary_operator(op->type, left, rdp_mult_exp(ctx));
+                break;
+            default:
+                return left;
+        }
     }
 }
 
