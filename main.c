@@ -3,6 +3,7 @@
 #include "token.h"
 #include "parser.h"
 #include "vec.h"
+#include "eval.h"
 
 VEC_DECLARE(token_t*, token);
 
@@ -13,7 +14,7 @@ void print_tree(node_t *node, size_t depth)
         printf("(%zd): %ld\n", depth, node->value);
         break;
     default:
-        printf("(%zd): %s\n", depth, __token_names[node->id] + 4);
+        printf("(%zd): %s\n", depth, __token_names[node->id]);
         break;
     }
 
@@ -55,8 +56,14 @@ int main(void)
     node_t *root = rdp_generate_ast(rctx);
 
     print_tree(root, 0);
-
     rdp_free(rctx);
+
+    printf("\nEVAL:\n----------\n");
+    eval_t *ectx = eval_init(root);
+
+    printf("%ld\n", eval_compute(ectx));
+
+    eval_free(ectx);
+
     return 0;
 }
-

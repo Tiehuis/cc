@@ -77,7 +77,7 @@ node_t* ast_unary_operator(int id, node_t *operand)
 node_t *ast_number(long value)
 {
     node_t *n = xmalloc(sizeof(node_t));
-    n->id = LITERAL;
+    n->id = TOK_NUMBER;
     n->value = value;
     n->is_term = 1;
     return n;
