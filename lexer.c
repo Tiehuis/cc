@@ -161,6 +161,12 @@ token_t* lex_token(lex_t *ctx)
         return lex_mkkw(TOK_MOD);
     case '=':
         return lex_mkkw(TOK_EQUALS);
+    case '&':
+        return lex_mkkw(TOK_BWAND);
+    case '|':
+        return lex_mkkw(TOK_BWOR);
+    case '^':
+        return lex_mkkw(TOK_BWXOR);
     case ';':
         return lex_mkkw(TOK_SEMICOLON);
     case '0' ... '9':

@@ -33,6 +33,12 @@ static long eval_node(node_t *node)
         return eval_node(node->left) * eval_node(node->right);
     case TOK_DIV:
         return eval_node(node->left) / eval_node(node->right);
+    case TOK_BWAND:
+        return eval_node(node->left) & eval_node(node->right);
+    case TOK_BWOR:
+        return eval_node(node->left) | eval_node(node->right);
+    case TOK_BWXOR:
+        return eval_node(node->left) ^ eval_node(node->right);
     case TOK_NUMBER:
         return node->value;
     default:

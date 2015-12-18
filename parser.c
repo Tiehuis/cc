@@ -12,11 +12,16 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "token.h"
 #include "compiler.h"
 #include "lexer.h"
 #include "parser.h"
+
+/**
+ * rdp context functions.
+ */
 
 rdp_t* rdp_init(token_t **tokens, size_t length)
 {
@@ -55,7 +60,11 @@ void rdp_consume_blanks(rdp_t *ctx)
         ctx->position++;
 }
 
-node_t* ast_binary_operator(int id, node_t *left, node_t *right)
+/**
+ * Node generation functions.
+ */
+
+static node_t* ast_binary_operator(int id, node_t *left, node_t *right)
 {
     node_t *n = xmalloc(sizeof(node_t));
     n->id = id;
@@ -65,7 +74,7 @@ node_t* ast_binary_operator(int id, node_t *left, node_t *right)
     return n;
 }
 
-node_t* ast_unary_operator(int id, node_t *operand)
+static node_t* ast_unary_operator(int id, node_t *operand)
 {
     node_t *n = xmalloc(sizeof(node_t));
     n->id = id;
@@ -74,7 +83,7 @@ node_t* ast_unary_operator(int id, node_t *operand)
     return n;
 }
 
-node_t *ast_number(long value)
+static node_t *ast_number(long value)
 {
     node_t *n = xmalloc(sizeof(node_t));
     n->id = TOK_NUMBER;
@@ -84,9 +93,13 @@ node_t *ast_number(long value)
 }
 
 /**
+ * Recursive Descent Parser functions.
+ */
+
+/**
  * <const> : [0-9]
  */
-node_t* rdp_const(rdp_t *ctx)
+static node_t* rdp_const(rdp_t *ctx)
 {
     rdp_consume_blanks(ctx);
     token_t *t = rdp_pop(ctx);
@@ -104,7 +117,7 @@ node_t* rdp_const(rdp_t *ctx)
 /**
  * <primary_exp> : <const>
  */
-node_t* rdp_primary_exp(rdp_t *ctx)
+static node_t* rdp_primary_exp(rdp_t *ctx)
 {
     return rdp_const(ctx);
 }
@@ -112,7 +125,7 @@ node_t* rdp_primary_exp(rdp_t *ctx)
 /**
  * <unary_exp> : <primary_exp>
  */
-node_t* rdp_unary_exp(rdp_t *ctx)
+static node_t* rdp_unary_exp(rdp_t *ctx)
 {
     return rdp_primary_exp(ctx);
 }
@@ -123,7 +136,7 @@ node_t* rdp_unary_exp(rdp_t *ctx)
  *            | <mult_exp> '/' <unary_exp>
  *            | <mult_exp> '%' <unary_exp>
  */
-node_t* rdp_mult_exp(rdp_t *ctx)
+static node_t* rdp_mult_exp(rdp_t *ctx)
 {
     node_t *left = rdp_unary_exp(ctx);
 
@@ -149,7 +162,7 @@ node_t* rdp_mult_exp(rdp_t *ctx)
  *                | <additive_exp> '+' <mult_exp>
  *                | <additive_exp> '-' <mult_exp>
  */
-node_t* rdp_additive_exp(rdp_t *ctx)
+static node_t* rdp_additive_exp(rdp_t *ctx)
 {
     node_t *left = rdp_mult_exp(ctx);
 
@@ -170,11 +183,81 @@ node_t* rdp_additive_exp(rdp_t *ctx)
 }
 
 /**
- * <expression> : <additive_exp>
+ * <and_exp> : <additive_exp>
+ *           | <and_exp> '&' <additive_exp>
  */
-node_t* rdp_expression(rdp_t *ctx)
+static node_t* rdp_and_exp(rdp_t *ctx)
 {
-    return rdp_additive_exp(ctx);
+    node_t *left = rdp_additive_exp(ctx);
+
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op = rdp_peek(ctx);
+
+        switch (op->type) {
+            case TOK_BWAND:
+                rdp_consume(ctx);
+                left = ast_binary_operator(op->type, left, rdp_additive_exp(ctx));
+                break;
+            default:
+                return left;
+        }
+    }
+}
+
+/**
+ * <xor_exp> : <and_exp>
+ *           | <xor_exp> '^' <and_exp>
+ */
+static node_t* rdp_xor_exp(rdp_t *ctx)
+{
+    node_t *left = rdp_and_exp(ctx);
+
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op = rdp_peek(ctx);
+
+        switch (op->type) {
+            case TOK_BWXOR:
+                rdp_consume(ctx);
+                left = ast_binary_operator(op->type, left, rdp_and_exp(ctx));
+                break;
+            default:
+                return left;
+        }
+    }
+}
+
+
+/**
+ * <ior_exp> : <xor_exp>
+ *           | <ior_exp> '|' <xor_exp>
+ */
+static node_t* rdp_ior_exp(rdp_t *ctx)
+{
+    node_t *left = rdp_xor_exp(ctx);
+
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op = rdp_peek(ctx);
+
+        switch (op->type) {
+            case TOK_BWOR:
+                rdp_consume(ctx);
+                left = ast_binary_operator(op->type, left, rdp_xor_exp(ctx));
+                break;
+            default:
+                return left;
+        }
+    }
+}
+
+/**
+ * <expression> : <ior_exp>
+ */
+static node_t* rdp_expression(rdp_t *ctx)
+{
+    return rdp_ior_exp(ctx);
 }
 
 /**
