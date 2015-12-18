@@ -96,6 +96,8 @@ static node_t *ast_number(long value)
  * Recursive Descent Parser functions.
  */
 
+static node_t* rdp_expression(rdp_t *ctx);
+
 /**
  * <const> : [0-9]
  */
@@ -116,10 +118,30 @@ static node_t* rdp_const(rdp_t *ctx)
 
 /**
  * <primary_exp> : <const>
+ *               | '(' <expression> ')'
  */
 static node_t* rdp_primary_exp(rdp_t *ctx)
 {
-    return rdp_const(ctx);
+    rdp_consume_blanks(ctx);
+    token_t *left = rdp_peek(ctx);
+
+    if (left->type == TOK_LPAREN) {
+        rdp_consume(ctx);
+        node_t *expr = rdp_expression(ctx);
+
+        rdp_consume_blanks(ctx);
+        token_t *right = rdp_pop(ctx);
+
+        if (right->type == TOK_RPAREN) {
+            return expr;
+        }
+        else {
+            xerror("Invalid symbol encountered");
+        }
+    }
+    else {
+        return rdp_const(ctx);
+    }
 }
 
 /**
