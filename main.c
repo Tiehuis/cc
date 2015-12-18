@@ -35,7 +35,7 @@ void print_tree(node_t *node, size_t depth)
 
 int main(void)
 {
-    lex_t *lctx = lex_init("test.c");
+    lex_t *lctx = lex_init("5 + (2 * 3)", STRING_BACKED);
     vec_token_t *tokens = vec_token_init();
 
     /* Construct lexemes from a file */

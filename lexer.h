@@ -9,16 +9,32 @@
 #include "token.h"
 #include "vec.h"
 
-/* Currently the lex_t stores the current file position that we are reading
- * from. This may be added to in the future */
+/**
+ * Enum for the type of 'lex_t' input.
+ */
+enum {
+    STRING_BACKED,
+    FILE_BACKED
+};
+
+/* Store either a file descriptor or a string and index. At some point, it may
+ * be good to read the file in chunks and use the string based method for most
+ * of the character gets. */
 typedef struct {
-    FILE *fd;
+    int type;
+    union {
+        FILE *fd;
+        struct {
+            char *string;
+            size_t position;
+        };
+    };
 } lex_t;
 
 /**
  * Initialize the lexer and return a handle.
  */
-lex_t* lex_init(char *filename);
+lex_t* lex_init(char *filename, int type);
 
 /**
  * Free any resources associated with the given lexer context.

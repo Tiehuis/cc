@@ -16,27 +16,48 @@ VEC_DECLARE(token_t*, token);
 /* Initialize vec_char_t */
 VEC_DECLARE(char, char);
 
-lex_t* lex_init(char *filename)
+lex_t* lex_init(char *data, int type)
 {
     lex_t *ctx = xmalloc(sizeof(lex_t));
-    ctx->fd = fopen(filename, "rb");
+    ctx->type = type;
+
+    if (ctx->type == STRING_BACKED) {
+        ctx->string = data;
+    }
+    else {
+        ctx->fd = fopen(data, "rb");
+    }
+
     return ctx;
 }
 
 void lex_free(lex_t *ctx)
 {
-    fclose(ctx->fd);
+    if (ctx->type == FILE_BACKED) {
+        fclose(ctx->fd);
+    }
     free(ctx);
 }
 
 static int lex_getc(lex_t *ctx)
 {
-    return fgetc(ctx->fd);
+    if (ctx->type == FILE_BACKED) {
+        return fgetc(ctx->fd);
+    }
+    else {
+        const char c = ctx->string[ctx->position++];
+        return c ? c : EOF;
+    }
 }
 
 static void lex_ungetc(lex_t *ctx, char c)
 {
-    ungetc(c, ctx->fd);
+    if (ctx->type == FILE_BACKED) {
+        ungetc(c, ctx->fd);
+    }
+    else {
+        ctx->position--;
+    }
 }
 
 /**
