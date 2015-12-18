@@ -3,8 +3,9 @@
  *
  * A simple line-based c interpreter currently used for testing.
  *
- * Currently encountering a compile error will crash the program. Not desirable
- * really, so it may change shortly.
+ * There are likely large errors with memory not being freed etc. I'll likely
+ * implement some memory pool structure for each phase to simplify this
+ * process.
  */
 
 #include <stdio.h>
@@ -45,10 +46,15 @@ int main(void)
         node_t *root = rdp_generate_ast(rctx);
         rdp_free(rctx);
 
-        /* Evaluate AST and print */
-        eval_t *ectx = eval_init(root);
-        printf("%ld\n", eval_compute(ectx));
-        eval_free(ectx);
+        if (root) {
+            /* Evaluate AST and print */
+            eval_t *ectx = eval_init(root);
+            printf("%ld\n", eval_compute(ectx));
+            eval_free(ectx);
+        }
+        else {
+            printf("Invalid expression\n");
+        }
     }
 
     return 0;

@@ -5,6 +5,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <setjmp.h>
 #include "compiler.h"
 #include "lexer.h"
 #include "vec.h"
@@ -36,6 +37,7 @@ typedef struct node_s {
 /* Stores the context of this recursive descent parser, in this case a stream
  * of tokens. */
 typedef struct {
+    jmp_buf env;
     token_t **tokens;
     size_t position;
     size_t length;

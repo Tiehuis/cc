@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <setjmp.h>
 #include "token.h"
 #include "compiler.h"
 #include "lexer.h"
@@ -58,6 +59,11 @@ void rdp_consume_blanks(rdp_t *ctx)
 {
     while (ctx->tokens[ctx->position]->type == TOK_SPACE)
         ctx->position++;
+}
+
+void rdp_fail(rdp_t *ctx)
+{
+    longjmp(ctx->env, 1);
 }
 
 /**
@@ -107,7 +113,8 @@ static node_t* rdp_const(rdp_t *ctx)
     token_t *t = rdp_pop(ctx);
 
     if (t->type != TOK_NUMBER) {
-        xerror("Invalid symbol encountered");
+        rdp_fail(ctx);
+        return NULL; /* Unreached */
     }
     else {
         /* Parse number into value */
@@ -136,7 +143,8 @@ static node_t* rdp_primary_exp(rdp_t *ctx)
             return expr;
         }
         else {
-            xerror("Invalid symbol encountered");
+            rdp_fail(ctx);
+            return NULL; /* Unreached */
         }
     }
     else {
@@ -283,9 +291,14 @@ static node_t* rdp_expression(rdp_t *ctx)
 }
 
 /**
- * Fix the non-decension issues.
+ * Generate an AST from a sequence of lexemes.
  */
 node_t* rdp_generate_ast(rdp_t *ctx)
 {
-    return rdp_expression(ctx);
+    if (!setjmp(ctx->env)) {
+        return rdp_expression(ctx);
+    }
+    else {
+        return NULL;
+    }
 }

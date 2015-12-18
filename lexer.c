@@ -21,11 +21,12 @@ lex_t* lex_init(char *data, int type)
     lex_t *ctx = xmalloc(sizeof(lex_t));
     ctx->type = type;
 
-    if (ctx->type == STRING_BACKED) {
-        ctx->string = data;
+    if (ctx->type == FILE_BACKED) {
+        ctx->fd = fopen(data, "rb");
     }
     else {
-        ctx->fd = fopen(data, "rb");
+        ctx->position = 0;
+        ctx->string = data;
     }
 
     return ctx;
@@ -45,8 +46,9 @@ static int lex_getc(lex_t *ctx)
         return fgetc(ctx->fd);
     }
     else {
+        /* FIXME: Uninitialized variable warning */
         const char c = ctx->string[ctx->position++];
-        return c ? c : EOF;
+        return c ? (int) c : EOF;
     }
 }
 
@@ -117,7 +119,7 @@ static token_t* lex_chnumber(lex_t *ctx, char value)
         vec_char_push(number, c);
     }
 
-    /* This will leak memory for the moment, not important just yet but beware */
+    /* FIXME: Memory Leak */
     vec_char_push(number, '\0');
     return lex_mknumber(TOK_NUMBER, number->data);
 }
@@ -136,7 +138,7 @@ static token_t* lex_chident(lex_t *ctx, char value)
         vec_char_push(identifier, c);
     }
 
-    /* This will leak memory for the moment, not important just yet but beware */
+    /* FIXME: Memory Leak */
     vec_char_push(identifier, '\0');
     return lex_mkident(TOK_IDENT, identifier->data);
 }
