@@ -59,6 +59,11 @@ static void vec_##typename##_push(vec_##typename##_t *v, type elem)          \
     v->data[v->len++] = elem;                                                \
 }                                                                            \
                                                                              \
+static void vec_##typename##_clear(vec_##typename##_t *v)                    \
+{                                                                            \
+    v->len = 0;                                                              \
+}                                                                            \
+                                                                             \
 static type vec_##typename##_pop(vec_##typename##_t *v)                      \
 {                                                                            \
     return v->data[--v->len];                                                \
