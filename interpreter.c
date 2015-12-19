@@ -36,6 +36,14 @@ int main(void)
         token_t *tok;
         do {
             tok = lex_token(lctx);
+
+            /* This is messy, but it doesn't matter */
+            if (tok == NULL) {
+                lex_free(lctx);
+                printf("Invalid Syntax\n");
+                goto retry;
+            }
+
             vec_token_push(tokens, tok);
         } while (tok->type != TOK_EOF);
 
@@ -51,10 +59,14 @@ int main(void)
             eval_t *ectx = eval_init(root);
             printf("%ld\n", eval_compute(ectx));
             eval_free(ectx);
+            continue;
         }
         else {
             printf("Invalid expression\n");
+            goto retry;
         }
+
+retry:;
     }
 
     return 0;

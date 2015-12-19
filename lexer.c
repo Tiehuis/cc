@@ -143,14 +143,39 @@ static token_t* lex_chident(lex_t *ctx, char value)
     return lex_mkident(TOK_IDENT, identifier->data);
 }
 
+static token_t* lex_chnot(lex_t *ctx)
+{
+    int c;
+
+    switch ((c = lex_getc(ctx))) {
+        case '=':   /* != */
+            return lex_mkkw(TOK_NEQUALITY);
+        default:
+            return NULL;
+    }
+}
+
+static token_t* lex_cheq(lex_t *ctx)
+{
+    int c;
+
+    switch ((c = lex_getc(ctx))) {
+        case '=':   /* == */
+            return lex_mkkw(TOK_EQUALITY);
+        default:    /* = */
+            lex_ungetc(ctx, c);
+            return lex_mkkw(TOK_BWOR);
+    }
+}
+
 static token_t* lex_chor(lex_t *ctx)
 {
     int c;
 
     switch ((c = lex_getc(ctx))) {
-        case '|':
+        case '|':   /* || */
             return lex_mkkw(TOK_LOR);
-        default:
+        default:    /* | */
             lex_ungetc(ctx, c);
             return lex_mkkw(TOK_BWOR);
     }
@@ -161,9 +186,9 @@ static token_t* lex_chand(lex_t *ctx)
     int c;
 
     switch ((c = lex_getc(ctx))) {
-        case '&':
+        case '&':   /* && */
             return lex_mkkw(TOK_LAND);
-        default:
+        default:    /* & */
             lex_ungetc(ctx, c);
             return lex_mkkw(TOK_BWAND);
     }
@@ -174,11 +199,11 @@ static token_t* lex_chlbr(lex_t *ctx)
     int c;
 
     switch ((c = lex_getc(ctx))) {
-        case '<':
+        case '<':   /* << */
             return lex_mkkw(TOK_LSHIFT);
-        case '=':
+        case '=':   /* <= */
             return lex_mkkw(TOK_LTE);
-        default:
+        default:    /* < */
             lex_ungetc(ctx, c);
             return lex_mkkw(TOK_LT);
     }
@@ -189,11 +214,11 @@ static token_t* lex_chrbr(lex_t *ctx)
     int c;
 
     switch ((c = lex_getc(ctx))) {
-        case '>':
+        case '>':   /* >> */
             return lex_mkkw(TOK_RSHIFT);
-        case '=':
+        case '=':   /* >= */
             return lex_mkkw(TOK_GTE);
-        default:
+        default:    /* > */
             lex_ungetc(ctx, c);
             return lex_mkkw(TOK_GT);
     }
@@ -238,8 +263,10 @@ token_t* lex_token(lex_t *ctx)
         return lex_mkkw(TOK_MULTIPLY);
     case '%':
         return lex_mkkw(TOK_MOD);
+    case '!':
+        return lex_chnot(ctx);
     case '=':
-        return lex_mkkw(TOK_EQUALS);
+        return lex_cheq(ctx);
     case '&':
         return lex_chand(ctx);
     case '|':

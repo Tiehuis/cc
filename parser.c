@@ -278,10 +278,11 @@ static node_t* rdp_relational_exp(rdp_t *ctx)
 }
 
 /**
- * <and_exp> : <relational_exp>
- *           | <and_exp> '&' <relational_exp>
+ * <equality_exp> : <relational_exp>
+ *                | <equality_exp> '==' <relational_exp>
+ *                | <equality_exp> '!=' <relational_exp>
  */
-static node_t* rdp_and_exp(rdp_t *ctx)
+static node_t* rdp_equality_exp(rdp_t *ctx)
 {
     node_t *left = rdp_relational_exp(ctx);
 
@@ -290,9 +291,33 @@ static node_t* rdp_and_exp(rdp_t *ctx)
         token_t *op = rdp_peek(ctx);
 
         switch (op->type) {
-            case TOK_BWAND:
+            case TOK_EQUALITY:
+            case TOK_NEQUALITY:
                 rdp_consume(ctx);
                 left = ast_binary_operator(op->type, left, rdp_relational_exp(ctx));
+                break;
+            default:
+                return left;
+        }
+    }
+}
+
+/**
+ * <and_exp> : <relational_exp>
+ *           | <and_exp> '&' <relational_exp>
+ */
+static node_t* rdp_and_exp(rdp_t *ctx)
+{
+    node_t *left = rdp_equality_exp(ctx);
+
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op = rdp_peek(ctx);
+
+        switch (op->type) {
+            case TOK_BWAND:
+                rdp_consume(ctx);
+                left = ast_binary_operator(op->type, left, rdp_equality_exp(ctx));
                 break;
             default:
                 return left;
