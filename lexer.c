@@ -143,40 +143,56 @@ static token_t* lex_chident(lex_t *ctx, char value)
     return lex_mkident(TOK_IDENT, identifier->data);
 }
 
-static token_t* lex_chlogical(lex_t *ctx, char value)
+static token_t* lex_chor(lex_t *ctx)
 {
-    int type, c;
+    int c;
 
-    if ((c = lex_getc(ctx)) == value) {
-        switch (value) {
+    switch ((c = lex_getc(ctx))) {
         case '|':
-            type = TOK_LOR;
-            break;
-        case '&':
-            type = TOK_LAND;
-            break;
+            return lex_mkkw(TOK_LOR);
         default:
-            /* Never reached */
-            return NULL;
-        }
+            lex_ungetc(ctx, c);
+            return lex_mkkw(TOK_BWOR);
     }
-    else {
-        lex_ungetc(ctx, c);
+}
 
-        switch (value) {
-        case '|':
-            type = TOK_BWOR;
-            break;
+static token_t* lex_chand(lex_t *ctx)
+{
+    int c;
+
+    switch ((c = lex_getc(ctx))) {
         case '&':
-            type = TOK_BWAND;
-            break;
+            return lex_mkkw(TOK_LAND);
         default:
-            /* Never reached */
-            return NULL;
-        }
+            lex_ungetc(ctx, c);
+            return lex_mkkw(TOK_BWAND);
     }
+}
 
-    return lex_mkkw(type);
+static token_t* lex_chlbr(lex_t *ctx)
+{
+    int c;
+
+    switch ((c = lex_getc(ctx))) {
+        case '<':
+            return lex_mkkw(TOK_LSHIFT);
+        default:
+            lex_ungetc(ctx, c);
+            return lex_mkkw(TOK_LT);
+    }
+}
+
+static token_t* lex_chrbr(lex_t *ctx)
+{
+    int c;
+
+    switch ((c = lex_getc(ctx))) {
+        case '>':
+            return lex_mkkw(TOK_RSHIFT);
+        default:
+            lex_ungetc(ctx, c);
+            return lex_mkkw(TOK_GT);
+    }
 }
 
 static int lex_skip_space(lex_t *ctx)
@@ -221,9 +237,13 @@ token_t* lex_token(lex_t *ctx)
     case '=':
         return lex_mkkw(TOK_EQUALS);
     case '&':
-        return lex_chlogical(ctx, c);
+        return lex_chand(ctx);
     case '|':
-        return lex_chlogical(ctx, c);
+        return lex_chor(ctx);
+    case '<':
+        return lex_chlbr(ctx);
+    case '>':
+        return lex_chrbr(ctx);
     case '^':
         return lex_mkkw(TOK_BWXOR);
     case '~':

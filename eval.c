@@ -62,6 +62,14 @@ static long eval_node(node_t *node)
             return eval_node(node->left) || eval_node(node->right);
         case TOK_LAND:
             return eval_node(node->left) && eval_node(node->right);
+        case TOK_LSHIFT:
+            return eval_node(node->left) << eval_node(node->right);
+        case TOK_RSHIFT:
+            return eval_node(node->left) >> eval_node(node->right);
+        case TOK_LT:
+            return eval_node(node->left) < eval_node(node->right);
+        case TOK_GT:
+            return eval_node(node->left) > eval_node(node->right);
         default:
             printf("%s\n", __token_names[node->id]);
             xerror("Invalid token");
