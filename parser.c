@@ -70,6 +70,17 @@ void rdp_fail(rdp_t *ctx)
  * Node generation functions.
  */
 
+static node_t* ast_ternary_operator(int id, node_t *i, node_t *t, node_t *e)
+{
+    node_t *n = xmalloc(sizeof(node_t));
+    n->arity = AST_TERNARY;
+    n->id = id;
+    n->i = i;
+    n->t = t;
+    n->e = e;
+    return n;
+}
+
 static node_t* ast_binary_operator(int id, node_t *left, node_t *right)
 {
     node_t *n = xmalloc(sizeof(node_t));
@@ -419,11 +430,45 @@ static node_t* rdp_lor_exp(rdp_t *ctx)
 }
 
 /**
+ * <conditional_exp> : <lor_exp>
+ *                   | <lor_exp> '?' <expression> : ':' <conditional_exp>
+ */
+static node_t* rdp_conditional_exp(rdp_t *ctx)
+{
+    /* This should be redone to output a binary expression like an if else
+     * chain would probably. */
+    node_t *iff = rdp_lor_exp(ctx);
+
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op1 = rdp_peek(ctx);
+
+        switch (op1->type) {
+            case TOK_QMARK:
+                rdp_consume(ctx);
+                node_t *then = rdp_expression(ctx);
+
+                token_t *op2 = rdp_pop(ctx);
+                if (op2->type == TOK_COLON) {
+                    return ast_ternary_operator(TOK_TERNARY, iff, then,
+                            rdp_conditional_exp(ctx));
+                }
+                else {
+                    rdp_fail(ctx);
+                    return NULL; /* Unreached */
+                }
+            default:
+                return iff;
+        }
+    }
+}
+
+/**
  * <expression> : <lor_exp>
  */
 static node_t* rdp_expression(rdp_t *ctx)
 {
-    return rdp_lor_exp(ctx);
+    return rdp_conditional_exp(ctx);
 }
 
 /**

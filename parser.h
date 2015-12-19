@@ -13,18 +13,24 @@
 enum {
     AST_NULLARY,
     AST_UNARY,
-    AST_BINARY
+    AST_BINARY,
+    AST_TERNARY
 };
 
 /**
  * Stores information about a ast node value.
  */
 typedef struct node_s {
-    int arity;
     int id;
+    int arity;
     union {
         /* char, int, long */
         long value;
+
+        /* Unary operator */
+        struct {
+            struct node_s *operand;
+        };
 
         /* Binary operator */
         struct {
@@ -32,9 +38,11 @@ typedef struct node_s {
             struct node_s *right;
         };
 
-        /* Unary operator */
+        /* Ternary operator */
         struct {
-            struct node_s *operand;
+            struct node_s *i; /* if */
+            struct node_s *t; /* then */
+            struct node_s *e; /* else */
         };
     };
 } node_t;

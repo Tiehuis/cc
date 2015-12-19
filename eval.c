@@ -83,6 +83,15 @@ static long eval_node(node_t *node)
             xerror("Invalid token");
         }
 
+    case AST_TERNARY:
+        switch (node->id) {
+        case TOK_TERNARY:
+            return eval_node(node->i) ? eval_node(node->t) : eval_node(node->e);
+        default:
+            printf("%s\n", __token_names[node->id]);
+            xerror("Invalid token");
+    }
+
     default:
         printf("%s\n", __token_names[node->id]);
         xerror("Invalid token");
