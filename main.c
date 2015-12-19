@@ -25,11 +25,17 @@ void print_tree(node_t *node, size_t depth)
     }
 
     /* Need to change when adding unary operators */
-    if (!node->is_term) {
-        if (node->left)
-            print_tree(node->left, depth + 1);
-        if (node->right)
+    switch (node->arity) {
+        case AST_BINARY:
             print_tree(node->right, depth + 1);
+            /* Fallthrough */
+        case AST_UNARY:
+            print_tree(node->left, depth + 1);
+            break;
+        case AST_NULLARY:
+        default:
+            ;
+            /* Nothing */
     }
 }
 

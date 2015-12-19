@@ -73,28 +73,28 @@ void rdp_fail(rdp_t *ctx)
 static node_t* ast_binary_operator(int id, node_t *left, node_t *right)
 {
     node_t *n = xmalloc(sizeof(node_t));
+    n->arity = AST_BINARY;
     n->id = id;
     n->left = left;
     n->right = right;
-    n->is_term = 0;
     return n;
 }
 
 static node_t* ast_unary_operator(int id, node_t *operand)
 {
     node_t *n = xmalloc(sizeof(node_t));
+    n->arity = AST_UNARY;
     n->id = id;
     n->operand = operand;
-    n->is_term = 0;
     return n;
 }
 
 static node_t *ast_number(long value)
 {
     node_t *n = xmalloc(sizeof(node_t));
+    n->arity = AST_NULLARY;
     n->id = TOK_NUMBER;
     n->value = value;
-    n->is_term = 1;
     return n;
 }
 
@@ -157,6 +157,18 @@ static node_t* rdp_primary_exp(rdp_t *ctx)
  */
 static node_t* rdp_unary_exp(rdp_t *ctx)
 {
+    rdp_consume_blanks(ctx);
+    token_t *op = rdp_peek(ctx);
+
+    switch (op->type) {
+        case TOK_PLUS:
+        case TOK_MINUS:
+            rdp_consume(ctx);
+            return ast_unary_operator(op->type, rdp_unary_exp(ctx));
+        default:
+            return rdp_primary_exp(ctx);
+    }
+
     return rdp_primary_exp(ctx);
 }
 

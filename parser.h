@@ -10,13 +10,18 @@
 #include "lexer.h"
 #include "vec.h"
 
+enum {
+    AST_NULLARY,
+    AST_UNARY,
+    AST_BINARY
+};
+
 /**
  * Stores information about a ast node value.
  */
 typedef struct node_s {
-    int type;
+    int arity;
     int id;
-    int is_term;
     union {
         /* char, int, long */
         long value;
