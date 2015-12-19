@@ -163,6 +163,7 @@ static node_t* rdp_unary_exp(rdp_t *ctx)
     switch (op->type) {
         case TOK_PLUS:
         case TOK_MINUS:
+        case TOK_BWNEG:
             rdp_consume(ctx);
             return ast_unary_operator(op->type, rdp_unary_exp(ctx));
         default:
