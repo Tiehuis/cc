@@ -296,11 +296,57 @@ static node_t* rdp_ior_exp(rdp_t *ctx)
 }
 
 /**
- * <expression> : <ior_exp>
+ * <land_exp> : <ior_exp>
+ *            | <land_exp> '&&' <ior_exp>
+ */
+static node_t* rdp_land_exp(rdp_t *ctx)
+{
+    node_t *left = rdp_ior_exp(ctx);
+
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op = rdp_peek(ctx);
+
+        switch (op->type) {
+            case TOK_LAND:
+                rdp_consume(ctx);
+                left = ast_binary_operator(op->type, left, rdp_ior_exp(ctx));
+                break;
+            default:
+                return left;
+        }
+    }
+}
+
+/**
+ * <lor_exp> : <land_exp>
+ *           | <lor_exp> '||' <land_exp>
+ */
+static node_t* rdp_lor_exp(rdp_t *ctx)
+{
+    node_t *left = rdp_land_exp(ctx);
+
+    while (1) {
+        rdp_consume_blanks(ctx);
+        token_t *op = rdp_peek(ctx);
+
+        switch (op->type) {
+            case TOK_LOR:
+                rdp_consume(ctx);
+                left = ast_binary_operator(op->type, left, rdp_land_exp(ctx));
+                break;
+            default:
+                return left;
+        }
+    }
+}
+
+/**
+ * <expression> : <lor_exp>
  */
 static node_t* rdp_expression(rdp_t *ctx)
 {
-    return rdp_ior_exp(ctx);
+    return rdp_lor_exp(ctx);
 }
 
 /**

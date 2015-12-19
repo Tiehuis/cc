@@ -143,6 +143,42 @@ static token_t* lex_chident(lex_t *ctx, char value)
     return lex_mkident(TOK_IDENT, identifier->data);
 }
 
+static token_t* lex_chlogical(lex_t *ctx, char value)
+{
+    int type, c;
+
+    if ((c = lex_getc(ctx)) == value) {
+        switch (value) {
+        case '|':
+            type = TOK_LOR;
+            break;
+        case '&':
+            type = TOK_LAND;
+            break;
+        default:
+            /* Never reached */
+            return NULL;
+        }
+    }
+    else {
+        lex_ungetc(ctx, c);
+
+        switch (value) {
+        case '|':
+            type = TOK_BWOR;
+            break;
+        case '&':
+            type = TOK_BWAND;
+            break;
+        default:
+            /* Never reached */
+            return NULL;
+        }
+    }
+
+    return lex_mkkw(type);
+}
+
 static int lex_skip_space(lex_t *ctx)
 {
     int c = lex_getc(ctx);
@@ -185,9 +221,9 @@ token_t* lex_token(lex_t *ctx)
     case '=':
         return lex_mkkw(TOK_EQUALS);
     case '&':
-        return lex_mkkw(TOK_BWAND);
+        return lex_chlogical(ctx, c);
     case '|':
-        return lex_mkkw(TOK_BWOR);
+        return lex_chlogical(ctx, c);
     case '^':
         return lex_mkkw(TOK_BWXOR);
     case '~':
