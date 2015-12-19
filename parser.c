@@ -265,7 +265,9 @@ static node_t* rdp_relational_exp(rdp_t *ctx)
 
         switch (op->type) {
             case TOK_LT:
+            case TOK_LTE:
             case TOK_GT:
+            case TOK_GTE:
                 rdp_consume(ctx);
                 left = ast_binary_operator(op->type, left, rdp_shift_exp(ctx));
                 break;

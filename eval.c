@@ -70,6 +70,10 @@ static long eval_node(node_t *node)
             return eval_node(node->left) < eval_node(node->right);
         case TOK_GT:
             return eval_node(node->left) > eval_node(node->right);
+        case TOK_LTE:
+            return eval_node(node->left) <= eval_node(node->right);
+        case TOK_GTE:
+            return eval_node(node->left) >= eval_node(node->right);
         default:
             printf("%s\n", __token_names[node->id]);
             xerror("Invalid token");

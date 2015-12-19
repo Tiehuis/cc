@@ -176,6 +176,8 @@ static token_t* lex_chlbr(lex_t *ctx)
     switch ((c = lex_getc(ctx))) {
         case '<':
             return lex_mkkw(TOK_LSHIFT);
+        case '=':
+            return lex_mkkw(TOK_LTE);
         default:
             lex_ungetc(ctx, c);
             return lex_mkkw(TOK_LT);
@@ -189,6 +191,8 @@ static token_t* lex_chrbr(lex_t *ctx)
     switch ((c = lex_getc(ctx))) {
         case '>':
             return lex_mkkw(TOK_RSHIFT);
+        case '=':
+            return lex_mkkw(TOK_GTE);
         default:
             lex_ungetc(ctx, c);
             return lex_mkkw(TOK_GT);
